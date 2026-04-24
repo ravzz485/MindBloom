@@ -16,4 +16,4 @@ router.get("/latest", protect, getLatestProgress);
 router.get("/report", protect, getFullReport);
 router.get("/stress-trend", protect, getStressTrend);
 
-export default router;
+export default router;//fgfhfhf
