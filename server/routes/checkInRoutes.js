@@ -9,7 +9,7 @@ import {
 import { protect } from "../middleware/authMiddleware.js";
 
 const router = express.Router();
-
+//abc
 router.post("/submit", protect, submitCheckIn);
 router.get("/history", protect, getCheckInHistory);
 router.get("/today", protect, getTodayCheckIn);
