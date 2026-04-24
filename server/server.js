@@ -10,6 +10,7 @@ import symptomRoutes from "./routes/symptomRoutes.js";
 import checkInRoutes from "./routes/checkInRoutes.js";
 import progressRoutes from "./routes/progressRoutes.js";
 import chatRoutes from "./routes/chatRoutes.js";
+import gamificationRoutes from "./routes/gamificationRoutes.js";
 
 dotenv.config();
 connectDB();
@@ -26,6 +27,7 @@ app.use("/api/symptom", symptomRoutes);
 app.use("/api/checkin", checkInRoutes);
 app.use("/api/progress", progressRoutes);
 app.use("/api/chat", chatRoutes);
+app.use("/api/gamification", gamificationRoutes);
 
 // Test route
 app.get("/", (req, res) => {
