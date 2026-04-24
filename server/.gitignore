@@ -5,3 +5,4 @@ Thumbs.db
 *.log
 .flutter-plugins
 .flutter-plugins-dependencies
+package-lock.json
