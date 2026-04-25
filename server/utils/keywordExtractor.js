@@ -1,4 +1,3 @@
-// Keywords for each category
 const depressionKeywords = [
   "hopeless", "worthless", "empty", "sad",
   "depressed", "crying", "lonely", "miserable",
@@ -25,7 +24,6 @@ const stressKeywords = [
   "frustrated", "angry", "burnout"
 ];
 
-// Extract keywords from text
 export const extractKeywords = (text) => {
   const textLower = text.toLowerCase();
   const found = [];
@@ -57,7 +55,6 @@ export const extractKeywords = (text) => {
   return found;
 };
 
-// Detect main issue from keywords
 export const detectIssue = (keywords) => {
   const counts = {
     depression: 0,
@@ -70,7 +67,6 @@ export const detectIssue = (keywords) => {
     counts[k.category]++;
   });
 
-  // Find category with most keywords
   const maxCategory = Object.keys(counts).reduce(
     (a, b) => counts[a] > counts[b] ? a : b
   );

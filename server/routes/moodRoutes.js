@@ -1,8 +1,8 @@
 import express from "express";
+import { getMoods } from "../controllers/moodController.js";
+
 const router = express.Router();
 
-router.get("/", (req, res) => {
-  res.json({ message: "Mood routes working!" });
-});
+router.get("/", getMoods);
 
 export default router;
