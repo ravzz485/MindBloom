@@ -8,6 +8,7 @@ import {
   extractKeywords,
   detectIssue
 } from "../utils/keywordExtractor.js";
+import axios from "axios"; // ✅ ML integration
 
 // ─── PHQ9 Assessment ────────────────────────────
 // @route POST /api/assessment/phq9
@@ -16,11 +17,9 @@ export const submitPHQ9 = async (req, res) => {
     const { answers } = req.body;
     const userId = req.user._id;
 
-    // Calculate score
     const score = answers.reduce((a, b) => a + b, 0);
     const risk = calculatePHQ9Risk(score);
 
-    // Save to database
     const assessment = await Assessment.create({
       userId,
       type: "PHQ9",
@@ -184,5 +183,44 @@ export const getLatestAssessment = async (req, res) => {
 
   } catch (error) {
     res.status(500).json({ message: error.message });
+  }
+};
+
+// ─── ML TEXT ANALYSIS (Flask Integration) ─────────
+// @route POST /api/assessment/ml-analyze
+export const analyzeWithML = async (req, res) => {
+  try {
+    const { text } = req.body;
+
+    if (!text) {
+      return res.status(400).json({
+        message: "Text is required"
+      });
+    }
+
+    const mlResponse = await axios.post(
+      "http://localhost:5001/ml/analyze",
+      { text }
+    );
+
+    const mlResult = mlResponse.data;
+
+    res.json({
+      success: true,
+      text,
+      keywords: mlResult.keywords,
+      detectedIssue: mlResult.detectedIssue,
+      riskLevel: mlResult.riskLevel,
+      cleanedText: mlResult.cleanedText,
+      disclaimer: mlResult.disclaimer
+    });
+
+  } catch (error) {
+    console.error("ML API Error:", error.message);
+
+    res.status(500).json({
+      message: "ML service error",
+      error: error.message
+    });
   }
 };
