@@ -13,7 +13,8 @@ const userProgressSchema = new mongoose.Schema({
   },
 
   badges: [{
-    type: String
+    type: String,
+    default: []
   }],
 
   streak: {
@@ -24,17 +25,23 @@ const userProgressSchema = new mongoose.Schema({
   lastActivityDate: {
     type: Date,
     default: null
-  }
+  },
+
+  // ✅ Challenge Tracking
+  completedChallenges: [{
+    challengeId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Challenge',
+      required: true
+    },
+    completedAt: {
+      type: Date,
+      default: Date.now
+    }
+  }]
 
 }, { timestamps: true });
 
-
-const UserProgress = mongoose.model(
-  'UserProgress',
-  userProgressSchema
-);
+const UserProgress = mongoose.model('UserProgress', userProgressSchema);
 
 export default UserProgress;
-
-
-//this is new one
