@@ -38,6 +38,19 @@ const userProgressSchema = new mongoose.Schema({
       type: Date,
       default: Date.now
     }
+  }],
+
+  // ✅ Reward Claim Tracking (ADD THIS)
+  claimedRewards: [{
+    rewardId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Reward',
+      required: true
+    },
+    claimedAt: {
+      type: Date,
+      default: Date.now
+    }
   }]
 
 }, { timestamps: true });
