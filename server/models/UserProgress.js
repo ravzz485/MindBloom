@@ -12,6 +12,17 @@ const userProgressSchema = new mongoose.Schema({
     default: 0
   },
 
+  // 🔥 XP SYSTEM (ADDED)
+  xp: {
+    type: Number,
+    default: 0
+  },
+
+  level: {
+    type: Number,
+    default: 1
+  },
+
   badges: [{
     type: String,
     default: []
@@ -27,7 +38,7 @@ const userProgressSchema = new mongoose.Schema({
     default: null
   },
 
-  // ✅ Challenge Tracking
+  // ✅ Challenge Tracking new
   completedChallenges: [{
     challengeId: {
       type: mongoose.Schema.Types.ObjectId,
@@ -40,7 +51,7 @@ const userProgressSchema = new mongoose.Schema({
     }
   }],
 
-  // ✅ Reward Claim Tracking (ADD THIS)
+  // ✅ Reward Claim Tracking
   claimedRewards: [{
     rewardId: {
       type: mongoose.Schema.Types.ObjectId,

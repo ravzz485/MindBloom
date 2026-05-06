@@ -1,6 +1,7 @@
 import UserProgress from '../models/UserProgress.js';
 import Challenge from '../models/Challenge.js';
-import Reward from '../models/Reward.js'; // ✅ ADD THIS
+import Reward from '../models/Reward.js'; 
+import { calculateLevel, xpForNextLevel } from '../utils/levelCalculator.js';
 
 
 // 🔹 Award Points (MVP)
@@ -22,7 +23,16 @@ export const awardPoints = async (req, res) => {
 
     const earnedPoints = pointsMap[activityType] || 5;
 
+    
     user.points += earnedPoints;
+    user.xp += earnedPoints;
+
+    // 🔥 Level calculation
+    const newLevel = calculateLevel(user.xp);
+
+    if (newLevel > user.level) {
+      user.level = newLevel;
+    }
 
     await user.save();
 
@@ -143,6 +153,13 @@ export const completeChallenge = async (req, res) => {
     }
 
     user.points += challenge.points;
+    user.xp += challenge.points;
+
+    const newLevel = calculateLevel(user.xp);
+
+    if (newLevel > user.level) {
+      user.level = newLevel;
+    }
 
     user.completedChallenges.push({
       challengeId
@@ -160,11 +177,6 @@ export const completeChallenge = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
-
-
-//////////////////////////////////////////////////////
-// 🔥 REWARD SYSTEM (NEW)
-//////////////////////////////////////////////////////
 
 
 // 🔹 Create Reward
@@ -268,6 +280,34 @@ export const claimReward = async (req, res) => {
       message: 'Reward claimed successfully',
       remainingPoints: user.points,
       data: user
+    });
+
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+//////////////////////////////////////////////////////
+// 🚀 XP LEVEL SYSTEM (ADD BELOW THIS)
+//////////////////////////////////////////////////////
+
+export const getLevelInfo = async (req, res) => {
+  try {
+
+    const { userId } = req.params;
+
+    const user = await UserProgress.findOne({ userId });
+
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    const nextLevelXP = user.level * 100;
+
+    res.status(200).json({
+      level: user.level,
+      xp: user.xp,
+      xpToNextLevel: nextLevelXP - user.xp
     });
 
   } catch (error) {

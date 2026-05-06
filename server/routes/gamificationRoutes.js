@@ -5,9 +5,10 @@ import {
   createChallenge,
   getChallenges,
   completeChallenge,
-  createReward,     // ✅ added
-  getRewards,       // ✅ added
-  claimReward       // ✅ added
+  createReward,     
+  getRewards,       
+  claimReward,
+  getLevelInfo   
 } from '../controllers/gamificationController.js';
 
 const router = express.Router();
@@ -24,10 +25,14 @@ router.get('/challenges', getChallenges);
 router.post('/challenge/complete', completeChallenge);
 
 
-// 🔥 Rewards (NEW)
+// 🔥 Rewards
 router.post('/reward', createReward);
 router.get('/rewards', getRewards);
 router.post('/reward/claim', claimReward);
+
+
+// 🚀 XP LEVEL SYSTEM (NEW)
+router.get('/level/:userId', getLevelInfo); 
 
 
 export default router;
