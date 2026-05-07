@@ -1,18 +1,30 @@
 import UserProgress from '../models/UserProgress.js';
 import Challenge from '../models/Challenge.js';
-import Reward from '../models/Reward.js'; 
-import { calculateLevel, xpForNextLevel } from '../utils/levelCalculator.js';
+import Reward from '../models/Reward.js';
+
+import {
+  calculateLevel,
+  xpForNextLevel
+} from '../utils/levelCalculator.js';
+
+import {
+  calculateTreeStage
+} from '../utils/treeGrowthCalculator.js';
 
 
 // 🔹 Award Points (MVP)
 export const awardPoints = async (req, res) => {
   try {
+
     const { userId, activityType } = req.body;
 
     let user = await UserProgress.findOne({ userId });
 
     if (!user) {
-      user = new UserProgress({ userId, streak: 1 });
+      user = new UserProgress({
+        userId,
+        streak: 1
+      });
     }
 
     const pointsMap = {
@@ -23,7 +35,7 @@ export const awardPoints = async (req, res) => {
 
     const earnedPoints = pointsMap[activityType] || 5;
 
-    
+    // ✅ Add points + XP
     user.points += earnedPoints;
     user.xp += earnedPoints;
 
@@ -34,6 +46,9 @@ export const awardPoints = async (req, res) => {
       user.level = newLevel;
     }
 
+    // 🌳 Update tree stage
+    user.treeStage = calculateTreeStage(user.xp);
+
     await user.save();
 
     res.status(200).json({
@@ -42,7 +57,9 @@ export const awardPoints = async (req, res) => {
     });
 
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.status(500).json({
+      error: error.message
+    });
   }
 };
 
@@ -50,6 +67,7 @@ export const awardPoints = async (req, res) => {
 // 🔹 Get User Progress
 export const getUserProgress = async (req, res) => {
   try {
+
     const { userId } = req.params;
 
     const user = await UserProgress.findOne({ userId });
@@ -65,7 +83,9 @@ export const getUserProgress = async (req, res) => {
     });
 
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.status(500).json({
+      error: error.message
+    });
   }
 };
 
@@ -73,10 +93,18 @@ export const getUserProgress = async (req, res) => {
 // 🔹 Create Challenge
 export const createChallenge = async (req, res) => {
   try {
-    const { title, description, points, type } = req.body;
+
+    const {
+      title,
+      description,
+      points,
+      type
+    } = req.body;
 
     if (!title) {
-      return res.status(400).json({ message: 'Title is required' });
+      return res.status(400).json({
+        message: 'Title is required'
+      });
     }
 
     const challenge = new Challenge({
@@ -94,7 +122,9 @@ export const createChallenge = async (req, res) => {
     });
 
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.status(500).json({
+      error: error.message
+    });
   }
 };
 
@@ -102,7 +132,10 @@ export const createChallenge = async (req, res) => {
 // 🔹 Get Challenges
 export const getChallenges = async (req, res) => {
   try {
-    const challenges = await Challenge.find({ isActive: true });
+
+    const challenges = await Challenge.find({
+      isActive: true
+    });
 
     res.status(200).json({
       count: challenges.length,
@@ -110,7 +143,9 @@ export const getChallenges = async (req, res) => {
     });
 
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.status(500).json({
+      error: error.message
+    });
   }
 };
 
@@ -118,6 +153,7 @@ export const getChallenges = async (req, res) => {
 // 🔹 Complete Challenge
 export const completeChallenge = async (req, res) => {
   try {
+
     const { userId, challengeId } = req.body;
 
     if (!userId || !challengeId) {
@@ -152,15 +188,21 @@ export const completeChallenge = async (req, res) => {
       });
     }
 
+    // ✅ Add points + XP
     user.points += challenge.points;
     user.xp += challenge.points;
 
+    // 🔥 Level calculation
     const newLevel = calculateLevel(user.xp);
 
     if (newLevel > user.level) {
       user.level = newLevel;
     }
 
+    // 🌳 Update tree stage
+    user.treeStage = calculateTreeStage(user.xp);
+
+    // ✅ Save challenge
     user.completedChallenges.push({
       challengeId
     });
@@ -174,7 +216,9 @@ export const completeChallenge = async (req, res) => {
     });
 
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.status(500).json({
+      error: error.message
+    });
   }
 };
 
@@ -182,7 +226,12 @@ export const completeChallenge = async (req, res) => {
 // 🔹 Create Reward
 export const createReward = async (req, res) => {
   try {
-    const { title, description, cost } = req.body;
+
+    const {
+      title,
+      description,
+      cost
+    } = req.body;
 
     if (!title || !cost) {
       return res.status(400).json({
@@ -204,7 +253,9 @@ export const createReward = async (req, res) => {
     });
 
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.status(500).json({
+      error: error.message
+    });
   }
 };
 
@@ -212,7 +263,10 @@ export const createReward = async (req, res) => {
 // 🔹 Get Rewards
 export const getRewards = async (req, res) => {
   try {
-    const rewards = await Reward.find({ isActive: true });
+
+    const rewards = await Reward.find({
+      isActive: true
+    });
 
     res.status(200).json({
       count: rewards.length,
@@ -220,7 +274,9 @@ export const getRewards = async (req, res) => {
     });
 
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.status(500).json({
+      error: error.message
+    });
   }
 };
 
@@ -228,6 +284,7 @@ export const getRewards = async (req, res) => {
 // 🔹 Claim Reward
 export const claimReward = async (req, res) => {
   try {
+
     const { userId, rewardId } = req.body;
 
     if (!userId || !rewardId) {
@@ -268,8 +325,10 @@ export const claimReward = async (req, res) => {
       });
     }
 
+    // ✅ Deduct points
     user.points -= reward.cost;
 
+    // ✅ Save claimed reward
     user.claimedRewards.push({
       rewardId
     });
@@ -283,12 +342,15 @@ export const claimReward = async (req, res) => {
     });
 
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.status(500).json({
+      error: error.message
+    });
   }
 };
 
+
 //////////////////////////////////////////////////////
-// 🚀 XP LEVEL SYSTEM (ADD BELOW THIS)
+// 🚀 XP LEVEL SYSTEM
 //////////////////////////////////////////////////////
 
 export const getLevelInfo = async (req, res) => {
@@ -299,7 +361,9 @@ export const getLevelInfo = async (req, res) => {
     const user = await UserProgress.findOne({ userId });
 
     if (!user) {
-      return res.status(404).json({ message: 'User not found' });
+      return res.status(404).json({
+        message: 'User not found'
+      });
     }
 
     const nextLevelXP = user.level * 100;
@@ -311,6 +375,39 @@ export const getLevelInfo = async (req, res) => {
     });
 
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.status(500).json({
+      error: error.message
+    });
+  }
+};
+
+
+//////////////////////////////////////////////////////
+// 🌳 TREE GROWTH SYSTEM
+//////////////////////////////////////////////////////
+
+export const getTreeStatus = async (req, res) => {
+  try {
+
+    const { userId } = req.params;
+
+    const user = await UserProgress.findOne({ userId });
+
+    if (!user) {
+      return res.status(404).json({
+        message: 'User not found'
+      });
+    }
+
+    res.status(200).json({
+      treeStage: user.treeStage,
+      xp: user.xp,
+      level: user.level
+    });
+
+  } catch (error) {
+    res.status(500).json({
+      error: error.message
+    });
   }
 };
