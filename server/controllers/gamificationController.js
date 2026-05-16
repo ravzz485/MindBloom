@@ -12,7 +12,7 @@ import {
 } from '../utils/treeGrowthCalculator.js';
 
 
-// 🔹 Award Points (MVP)
+//  Award Points (MVP)
 export const awardPoints = async (req, res) => {
   try {
 
@@ -35,18 +35,18 @@ export const awardPoints = async (req, res) => {
 
     const earnedPoints = pointsMap[activityType] || 5;
 
-    // ✅ Add points + XP
+    //  Add points + XP
     user.points += earnedPoints;
     user.xp += earnedPoints;
 
-    // 🔥 Level calculation
+    //  Level calculation
     const newLevel = calculateLevel(user.xp);
 
     if (newLevel > user.level) {
       user.level = newLevel;
     }
 
-    // 🌳 Update tree stage
+    //  Update tree stage
     user.treeStage = calculateTreeStage(user.xp);
 
     await user.save();
@@ -64,7 +64,7 @@ export const awardPoints = async (req, res) => {
 };
 
 
-// 🔹 Get User Progress
+//  Get User Progress
 export const getUserProgress = async (req, res) => {
   try {
 
@@ -90,7 +90,7 @@ export const getUserProgress = async (req, res) => {
 };
 
 
-// 🔹 Create Challenge
+//  Create Challenge
 export const createChallenge = async (req, res) => {
   try {
 
@@ -129,7 +129,7 @@ export const createChallenge = async (req, res) => {
 };
 
 
-// 🔹 Get Challenges
+//  Get Challenges
 export const getChallenges = async (req, res) => {
   try {
 
@@ -150,7 +150,7 @@ export const getChallenges = async (req, res) => {
 };
 
 
-// 🔹 Complete Challenge
+//  Complete Challenge
 export const completeChallenge = async (req, res) => {
   try {
 
@@ -188,21 +188,21 @@ export const completeChallenge = async (req, res) => {
       });
     }
 
-    // ✅ Add points + XP
+    //  Add points + XP
     user.points += challenge.points;
     user.xp += challenge.points;
 
-    // 🔥 Level calculation
+    //  Level calculation
     const newLevel = calculateLevel(user.xp);
 
     if (newLevel > user.level) {
       user.level = newLevel;
     }
 
-    // 🌳 Update tree stage
+    //  Update tree stage
     user.treeStage = calculateTreeStage(user.xp);
 
-    // ✅ Save challenge
+    //  Save challenge
     user.completedChallenges.push({
       challengeId
     });
@@ -223,7 +223,7 @@ export const completeChallenge = async (req, res) => {
 };
 
 
-// 🔹 Create Reward
+//  Create Reward
 export const createReward = async (req, res) => {
   try {
 
@@ -260,7 +260,7 @@ export const createReward = async (req, res) => {
 };
 
 
-// 🔹 Get Rewards
+//  Get Rewards
 export const getRewards = async (req, res) => {
   try {
 
@@ -281,7 +281,7 @@ export const getRewards = async (req, res) => {
 };
 
 
-// 🔹 Claim Reward
+//  Claim Reward
 export const claimReward = async (req, res) => {
   try {
 
@@ -325,10 +325,10 @@ export const claimReward = async (req, res) => {
       });
     }
 
-    // ✅ Deduct points
+    //  Deduct points
     user.points -= reward.cost;
 
-    // ✅ Save claimed reward
+    //  Save claimed reward
     user.claimedRewards.push({
       rewardId
     });
@@ -350,7 +350,7 @@ export const claimReward = async (req, res) => {
 
 
 //////////////////////////////////////////////////////
-// 🚀 XP LEVEL SYSTEM
+//  XP LEVEL SYSTEM
 //////////////////////////////////////////////////////
 
 export const getLevelInfo = async (req, res) => {
@@ -383,7 +383,7 @@ export const getLevelInfo = async (req, res) => {
 
 
 //////////////////////////////////////////////////////
-// 🌳 TREE GROWTH SYSTEM
+//  TREE GROWTH SYSTEM
 //////////////////////////////////////////////////////
 
 export const getTreeStatus = async (req, res) => {

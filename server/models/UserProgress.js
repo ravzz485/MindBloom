@@ -12,7 +12,7 @@ const userProgressSchema = new mongoose.Schema({
     default: 0
   },
 
-  // 🔥 XP SYSTEM
+  //  XP SYSTEM
   xp: {
     type: Number,
     default: 0
@@ -23,7 +23,7 @@ const userProgressSchema = new mongoose.Schema({
     default: 1
   },
 
-  // 🌳 TREE GROWTH SYSTEM
+  //  TREE GROWTH SYSTEM
   treeStage: {
     type: String,
     default: 'Seed'
@@ -44,7 +44,7 @@ const userProgressSchema = new mongoose.Schema({
     default: null
   },
 
-  // ✅ Challenge Tracking
+  //  Challenge Tracking
   completedChallenges: [{
     challengeId: {
       type: mongoose.Schema.Types.ObjectId,
@@ -57,7 +57,7 @@ const userProgressSchema = new mongoose.Schema({
     }
   }],
 
-  // ✅ Reward Claim Tracking
+  //  Reward Claim Tracking
   claimedRewards: [{
     rewardId: {
       type: mongoose.Schema.Types.ObjectId,

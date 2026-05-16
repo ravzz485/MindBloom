@@ -43,11 +43,11 @@ export const submitCheckIn = async (req, res) => {
 
     // Generate feedback
     let feedback = [];
-    if (sleepHours < 6) feedback.push("⚠️ You slept less than 6 hours!");
-    if (stressLevel >= 7) feedback.push("⚠️ Your stress level is high!");
-    if (screenTime > 6) feedback.push("⚠️ High screen time detected!");
-    if (exercised) feedback.push("✅ Great job exercising today!");
-    if (meditated) feedback.push("✅ Great job meditating today!");
+    if (sleepHours < 6) feedback.push(" You slept less than 6 hours!");
+    if (stressLevel >= 7) feedback.push(" Your stress level is high!");
+    if (screenTime > 6) feedback.push(" High screen time detected!");
+    if (exercised) feedback.push(" Great job exercising today!");
+    if (meditated) feedback.push(" Great job meditating today!");
 
     res.status(201).json({
       success: true,
@@ -194,14 +194,14 @@ export const getMoodTrend = async (req, res) => {
       (a, b) => a + b, 0) / stressLevels.length;
 
     let trend = "stable";
-    let trendMessage = "Your stress is stable 😊";
+    let trendMessage = "Your stress is stable ";
 
     if (avgRecent > avgAll + 1) {
       trend = "worsening";
-      trendMessage = "⚠️ Your stress has been increasing!";
+      trendMessage = " Your stress has been increasing!";
     } else if (avgRecent < avgAll - 1) {
       trend = "improving";
-      trendMessage = "✅ Your stress is improving!";
+      trendMessage = " Your stress is improving!";
     }
 
     res.json({
