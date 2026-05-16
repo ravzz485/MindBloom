@@ -13,6 +13,7 @@
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'streak_screen.dart';                          // ← ADDED
 
 // ── Standalone entry point (delete when integrating) ─────────────────────────
 void main() {
@@ -35,39 +36,32 @@ class _App extends StatelessWidget {
 
 // ── Colour tokens ─────────────────────────────────────────────────────────────
 class _C {
-  // Brand — #174143 dark teal
-  static const brand       = Color(0xFF174143);
-  static const brandSoft   = Color(0xFFE4F0F0);
-
-  // Surfaces
-  static const bg          = Color(0xFFF3F6F6);
-  static const card        = Color(0xFFFFFFFF);
-  static const border      = Color(0xFFDCE8E8);
-
-  // Text
-  static const textDark    = Color(0xFF0D2B2D);
-  static const textMid     = Color(0xFF4A7274);
-  static const textLight   = Color(0xFF8BADB0);
-
-  // Quick-card accents
-  static const red         = Color(0xFFC53030);
-  static const redBg       = Color(0xFFFFF0F0);
-  static const redBorder   = Color(0xFFFECACA);
-  static const purple      = Color(0xFF6D28D9);
-  static const purpleBg    = Color(0xFFF3F0FF);
-  static const purpleBorder= Color(0xFFDDD6FE);
-  static const amber       = Color(0xFFB45309);
-  static const amberBg     = Color(0xFFFEF9EC);
-  static const amberBorder = Color(0xFFFDE68A);
-  static const blue        = Color(0xFF1D4ED8);
-  static const blueBg      = Color(0xFFEFF6FF);
-  static const blueBorder  = Color(0xFFBFDBFE);
-  static const olive       = Color(0xFF3F6212);
-  static const oliveBg     = Color(0xFFF0FDF0);
-  static const oliveBorder = Color(0xFFBBF7D0);
-  static const rose        = Color(0xFFBE185D);
-  static const roseBg      = Color(0xFFFDF2F8);
-  static const roseBorder  = Color(0xFFF9A8D4);
+  static const brand        = Color(0xFF174143);
+  static const brandSoft    = Color(0xFFE4F0F0);
+  static const bg           = Color(0xFFF3F6F6);
+  static const card         = Color(0xFFFFFFFF);
+  static const border       = Color(0xFFDCE8E8);
+  static const textDark     = Color(0xFF0D2B2D);
+  static const textMid      = Color(0xFF4A7274);
+  static const textLight    = Color(0xFF8BADB0);
+  static const red          = Color(0xFFC53030);
+  static const redBg        = Color(0xFFFFF0F0);
+  static const redBorder    = Color(0xFFFECACA);
+  static const purple       = Color(0xFF6D28D9);
+  static const purpleBg     = Color(0xFFF3F0FF);
+  static const purpleBorder = Color(0xFFDDD6FE);
+  static const amber        = Color(0xFFB45309);
+  static const amberBg      = Color(0xFFFEF9EC);
+  static const amberBorder  = Color(0xFFFDE68A);
+  static const blue         = Color(0xFF1D4ED8);
+  static const blueBg       = Color(0xFFEFF6FF);
+  static const blueBorder   = Color(0xFFBFDBFE);
+  static const olive        = Color(0xFF3F6212);
+  static const oliveBg      = Color(0xFFF0FDF0);
+  static const oliveBorder  = Color(0xFFBBF7D0);
+  static const rose         = Color(0xFFBE185D);
+  static const roseBg       = Color(0xFFFDF2F8);
+  static const roseBorder   = Color(0xFFF9A8D4);
 }
 
 // ── Data model ────────────────────────────────────────────────────────────────
@@ -75,7 +69,7 @@ class _GData {
   final String name, rankTitle, treeState;
   final int    points, streak, xpLevel, currentXP, xpGoal,
                challenges, badges;
-  final double wellness; // 0.0–1.0
+  final double wellness;
   const _GData({
     required this.name,       required this.rankTitle,
     required this.treeState,  required this.points,
@@ -101,8 +95,6 @@ class _ScreenState extends State<GamificationHomeScreen>
 
   bool _loaded = false;
 
-  // ── Replace with real API call ─────────────────────────────────────────────
-  // Example: final data = await ApiService.getGamificationData(userId);
   final _d = const _GData(
     name:       'Kavya',
     rankTitle:  'Mindful Explorer',
@@ -126,12 +118,10 @@ class _ScreenState extends State<GamificationHomeScreen>
         duration: const Duration(milliseconds: 1200));
     _barCtrl  = AnimationController(vsync: this,
         duration: const Duration(milliseconds: 1000));
-
     _fade = CurvedAnimation(parent: _fadeCtrl, curve: Curves.easeOut);
     _ring = CurvedAnimation(parent: _ringCtrl, curve: Curves.easeOutCubic);
     _bar  = CurvedAnimation(parent: _barCtrl,  curve: Curves.easeOutCubic);
 
-    // Simulate API load — swap for real fetch
     Future.delayed(const Duration(milliseconds: 300), () {
       if (!mounted) return;
       setState(() => _loaded = true);
@@ -148,16 +138,30 @@ class _ScreenState extends State<GamificationHomeScreen>
     super.dispose();
   }
 
+  // ── Navigation ────────────────────────────────────────────────────────────
   void _go(String route) {
-    // Replace with: Navigator.pushNamed(context, '/$route');
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-      content:         Text('Opening $route'),
-      backgroundColor: _C.brand,
-      behavior:        SnackBarBehavior.floating,
-      duration:        const Duration(milliseconds: 900),
-      shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12)),
-    ));
+    switch (route) {
+      // ── STREAK → StreakScreen ─────────────────────────────────────────────
+      case 'streak':
+        Navigator.push(                                // ← ADDED
+          context,
+          MaterialPageRoute(
+            builder: (_) => const StreakScreen(),      // ← ADDED
+          ),
+        );
+        break;
+
+      // ── Other screens (add Navigator.push here as you build them) ─────────
+      default:
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content:         Text('Opening $route'),
+          backgroundColor: _C.brand,
+          behavior:        SnackBarBehavior.floating,
+          duration:        const Duration(milliseconds: 900),
+          shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12)),
+        ));
+    }
   }
 
   // ── Build ─────────────────────────────────────────────────────────────────
@@ -237,7 +241,6 @@ class _ScreenState extends State<GamificationHomeScreen>
                     ],
                   ),
                 ),
-                // Rank pill
                 Container(
                   padding: const EdgeInsets.symmetric(
                       horizontal: 10, vertical: 6),
@@ -260,7 +263,6 @@ class _ScreenState extends State<GamificationHomeScreen>
                   ]),
                 ),
                 const SizedBox(width: 8),
-                // Bell button
                 Container(
                   width: 36, height: 36,
                   decoration: BoxDecoration(
@@ -301,7 +303,7 @@ class _ScreenState extends State<GamificationHomeScreen>
           chipText:  'Keep it up!',
           chipColor: _C.olive,
           chipBg:    _C.oliveBg,
-          onTap:     () => _go('streak'),
+          onTap:     () => _go('streak'),   // ← navigates to StreakScreen
         )),
       ]);
 
@@ -371,7 +373,7 @@ class _ScreenState extends State<GamificationHomeScreen>
         ),
       );
 
-  // ── XP card with animated circular ring ───────────────────────────────────
+  // ── XP card ───────────────────────────────────────────────────────────────
   Widget _xpCard() => GestureDetector(
         onTap: () => _go('xp_level'),
         child: Container(
@@ -385,11 +387,9 @@ class _ScreenState extends State<GamificationHomeScreen>
             )],
           ),
           child: Row(children: [
-            // Left text
             Expanded(child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Level badge
                 Container(
                   padding: const EdgeInsets.symmetric(
                       horizontal: 10, vertical: 5),
@@ -428,7 +428,6 @@ class _ScreenState extends State<GamificationHomeScreen>
                   ),
                 ),
                 const SizedBox(height: 14),
-                // Footer
                 AnimatedBuilder(
                   animation: _ring,
                   builder: (_, __) {
@@ -458,7 +457,6 @@ class _ScreenState extends State<GamificationHomeScreen>
               ],
             )),
             const SizedBox(width: 16),
-            // Circular ring
             AnimatedBuilder(
               animation: _ring,
               builder: (_, __) => SizedBox(
@@ -490,7 +488,7 @@ class _ScreenState extends State<GamificationHomeScreen>
         ),
       );
 
-  // ── Tree / Mental Twin card ───────────────────────────────────────────────
+  // ── Tree card ─────────────────────────────────────────────────────────────
   Widget _treeCard() => GestureDetector(
         onTap: () => _go('tree'),
         child: Container(
@@ -505,7 +503,6 @@ class _ScreenState extends State<GamificationHomeScreen>
             )],
           ),
           child: Row(children: [
-            // Tree icon block
             Container(
               width: 64, height: 64,
               decoration: BoxDecoration(
@@ -519,7 +516,6 @@ class _ScreenState extends State<GamificationHomeScreen>
             Expanded(child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Name + state chip
                 Row(children: [
                   const Text('Mental Twin',
                       style: TextStyle(
@@ -548,7 +544,6 @@ class _ScreenState extends State<GamificationHomeScreen>
                   style: TextStyle(fontSize: 11, color: _C.textMid),
                 ),
                 const SizedBox(height: 10),
-                // Wellness animated bar
                 Row(children: [
                   Text('${(_d.wellness * 100).toInt()}%',
                       style: const TextStyle(
@@ -602,7 +597,7 @@ class _ScreenState extends State<GamificationHomeScreen>
     final items = [
       _QI(Icons.local_fire_department_outlined,
           'Streak',     '${_d.streak} Days Streak',
-          _C.red,    _C.redBg,    _C.redBorder,    'streak'),
+          _C.red,    _C.redBg,    _C.redBorder,    'streak'),   // ← StreakScreen
       _QI(Icons.bolt_outlined,
           'XP Level',  'Level ${_d.xpLevel}',
           _C.purple, _C.purpleBg, _C.purpleBorder, 'xp_level'),
@@ -620,7 +615,6 @@ class _ScreenState extends State<GamificationHomeScreen>
           _C.olive,  _C.oliveBg,  _C.oliveBorder,  'tree'),
     ];
 
-    // 3-column grid
     return Column(children: [
       _qRow(items[0], items[1], items[2]),
       const SizedBox(height: 9),
@@ -651,7 +645,6 @@ class _ScreenState extends State<GamificationHomeScreen>
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisAlignment:  MainAxisAlignment.spaceBetween,
             children: [
-              // Icon circle
               Container(
                 width: 38, height: 38,
                 decoration: const BoxDecoration(
@@ -659,7 +652,6 @@ class _ScreenState extends State<GamificationHomeScreen>
                 child: Icon(q.icon, color: q.color, size: 20),
               ),
               const SizedBox(height: 10),
-              // Label with pipe
               Row(children: [
                 Flexible(
                   child: Text(q.label, style: const TextStyle(
@@ -729,7 +721,7 @@ class _ScreenState extends State<GamificationHomeScreen>
 
 // ── Circular ring CustomPainter ───────────────────────────────────────────────
 class _RingPainter extends CustomPainter {
-  final double progress; // 0.0–1.0
+  final double progress;
   const _RingPainter(this.progress);
 
   @override
@@ -738,7 +730,6 @@ class _RingPainter extends CustomPainter {
     final cy     = size.height / 2;
     final radius = size.width  / 2 - 5;
 
-    // Track (dim)
     canvas.drawCircle(
       Offset(cx, cy), radius,
       Paint()
@@ -747,7 +738,6 @@ class _RingPainter extends CustomPainter {
         ..strokeWidth = 6,
     );
 
-    // Progress arc (white)
     canvas.drawArc(
       Rect.fromCircle(center: Offset(cx, cy), radius: radius),
       -math.pi / 2,
