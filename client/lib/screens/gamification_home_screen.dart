@@ -8,12 +8,6 @@
 //   • No emojis — Tabler / Material icons only
 //   • Animated XP ring + wellness bar on load
 //
-//  Setup:
-//   1. Copy to lib/screens/gamification/gamification_home_screen.dart
-//   2. No extra packages required (pure Flutter SDK)
-//   3. Add route in main.dart:
-//        '/gamification': (_) => const GamificationHomeScreen(),
-//   4. Replace the mock _GData block with your real API call
 // ============================================================
 
 import 'dart:math' as math;
