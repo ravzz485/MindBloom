@@ -2,18 +2,14 @@
 //  Screen 1 — Gamification Home Dashboard
 //  Mental Health Risk Screening & Self-Care App
 //
-//  Design:
-//   • #174143 header + XP card  (≈25 % of screen)
-//   • White / off-white body    (≈75 % of screen)
-//   • No emojis — Tabler / Material icons only
-//   • Animated XP ring + wellness bar on load
 //
 // ============================================================
 
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'streak_screen.dart';                          // ← ADDED
+import 'streak_screen.dart';       // ← Screen 2
+import 'xp_level_screen.dart';     // ← Screen 3 (ADDED)
 
 // ── Standalone entry point (delete when integrating) ─────────────────────────
 void main() {
@@ -141,17 +137,20 @@ class _ScreenState extends State<GamificationHomeScreen>
   // ── Navigation ────────────────────────────────────────────────────────────
   void _go(String route) {
     switch (route) {
-      // ── STREAK → StreakScreen ─────────────────────────────────────────────
+
+      // ── Streak → StreakScreen ─────────────────────────────────────────────
       case 'streak':
-        Navigator.push(                                // ← ADDED
-          context,
-          MaterialPageRoute(
-            builder: (_) => const StreakScreen(),      // ← ADDED
-          ),
-        );
+        Navigator.push(context,
+            MaterialPageRoute(builder: (_) => const StreakScreen()));
         break;
 
-      // ── Other screens (add Navigator.push here as you build them) ─────────
+      // ── XP Level → XpLevelScreen ─────────────────────────────────────────
+      case 'xp_level':
+        Navigator.push(context,                              // ← ADDED
+            MaterialPageRoute(builder: (_) => const XpLevelScreen()));
+        break;
+
+      // ── Other screens — add Navigator.push as you build them ──────────────
       default:
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
           content:         Text('Opening $route'),
@@ -303,7 +302,7 @@ class _ScreenState extends State<GamificationHomeScreen>
           chipText:  'Keep it up!',
           chipColor: _C.olive,
           chipBg:    _C.oliveBg,
-          onTap:     () => _go('streak'),   // ← navigates to StreakScreen
+          onTap:     () => _go('streak'),
         )),
       ]);
 
@@ -375,7 +374,7 @@ class _ScreenState extends State<GamificationHomeScreen>
 
   // ── XP card ───────────────────────────────────────────────────────────────
   Widget _xpCard() => GestureDetector(
-        onTap: () => _go('xp_level'),
+        onTap: () => _go('xp_level'),   // ← tapping card opens XpLevelScreen
         child: Container(
           padding: const EdgeInsets.all(18),
           decoration: BoxDecoration(
@@ -430,7 +429,7 @@ class _ScreenState extends State<GamificationHomeScreen>
                 const SizedBox(height: 14),
                 AnimatedBuilder(
                   animation: _ring,
-                  builder: (_, __) {
+                  builder: (context, child) {           // ← fixed _ warning
                     final pct =
                         (_ring.value * _d.currentXP / _d.xpGoal * 100)
                             .round();
@@ -459,7 +458,8 @@ class _ScreenState extends State<GamificationHomeScreen>
             const SizedBox(width: 16),
             AnimatedBuilder(
               animation: _ring,
-              builder: (_, __) => SizedBox(
+              builder: (context, child) =>             // ← fixed _ warning
+                  SizedBox(
                 width: 86, height: 86,
                 child: CustomPaint(
                   painter: _RingPainter(
@@ -555,7 +555,8 @@ class _ScreenState extends State<GamificationHomeScreen>
                     borderRadius: BorderRadius.circular(4),
                     child: AnimatedBuilder(
                       animation: _bar,
-                      builder: (_, __) => LinearProgressIndicator(
+                      builder: (context, child) =>     // ← fixed _ warning
+                          LinearProgressIndicator(
                         value:           _bar.value * _d.wellness,
                         minHeight:       6,
                         backgroundColor: _C.brand.withOpacity(.1),
@@ -597,10 +598,10 @@ class _ScreenState extends State<GamificationHomeScreen>
     final items = [
       _QI(Icons.local_fire_department_outlined,
           'Streak',     '${_d.streak} Days Streak',
-          _C.red,    _C.redBg,    _C.redBorder,    'streak'),   // ← StreakScreen
+          _C.red,    _C.redBg,    _C.redBorder,    'streak'),
       _QI(Icons.bolt_outlined,
           'XP Level',  'Level ${_d.xpLevel}',
-          _C.purple, _C.purpleBg, _C.purpleBorder, 'xp_level'),
+          _C.purple, _C.purpleBg, _C.purpleBorder, 'xp_level'),  // ← XpLevelScreen
       _QI(Icons.flag_outlined,
           'Challenges', '${_d.challenges} active',
           _C.amber,  _C.amberBg,  _C.amberBorder,  'challenges'),
