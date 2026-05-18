@@ -4,9 +4,7 @@ import Mood from "../models/Mood.js";
 
 const router = express.Router()
 
-/* =========================
-   📄 MONTHLY REPORT
-========================= */
+
 router.get("/monthly-report", authMiddleware, async (req, res) => {
   try {
     const data = await Mood.find();
