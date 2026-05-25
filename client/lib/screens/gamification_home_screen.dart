@@ -8,7 +8,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'streak_screen.dart';       // ← Screen 2
 import 'xp_level_screen.dart';     // ← Screen 3
-import 'challenges screen.dart';   // ← Screen 4  ✅ ADDED
+import 'challenges screen.dart';   // ← Screen 4 
+import 'rewards_screen.dart'; //  ← Screen 5
 
 // ── Standalone entry point (delete when integrating) ─────────────────────────
 void main() {
@@ -149,10 +150,16 @@ class _ScreenState extends State<GamificationHomeScreen>
             MaterialPageRoute(builder: (_) => const XpLevelScreen()));
         break;
 
-      // ── Challenges → ChallengesScreen ✅ ADDED ────────────────────────────
+      // ── Challenges → ChallengesScreen 
       case 'challenges':
         Navigator.push(context,
             MaterialPageRoute(builder: (_) => const ChallengesScreen()));
+        break;
+
+      // ── Rewards → RewardsScreen 
+      case 'rewards':
+        Navigator.push(context,
+            MaterialPageRoute(builder: (_) => const RewardsScreen()));
         break;
 
       // ── Other screens — add Navigator.push as you build them ──────────────
