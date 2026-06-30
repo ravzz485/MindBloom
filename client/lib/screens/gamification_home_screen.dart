@@ -92,7 +92,7 @@ class _ScreenState extends State<GamificationHomeScreen>
   bool _loaded = false;
 
   final _d = const _GData(
-    name:       'Kavya',
+    name:       'Alex',
     rankTitle:  'Mindful Explorer',
     treeState:  'Thriving',
     points:     1250,
