@@ -10,6 +10,7 @@ import 'streak_screen.dart';       // ← Screen 2
 import 'xp_level_screen.dart';     // ← Screen 3
 import 'challenges screen.dart';   // ← Screen 4 
 import 'rewards_screen.dart'; //  ← Screen 5
+import 'badges_screen.dart';  //  ← Screen 6
 
 // ── Standalone entry point (delete when integrating) ─────────────────────────
 void main() {
@@ -98,7 +99,7 @@ class _ScreenState extends State<GamificationHomeScreen>
     points:     1250,
     streak:     7,
     xpLevel:    5,
-    currentXP:  340,
+    currentXP:  340, 
     xpGoal:     500,
     challenges: 2,
     badges:     3,
@@ -161,6 +162,13 @@ class _ScreenState extends State<GamificationHomeScreen>
         Navigator.push(context,
             MaterialPageRoute(builder: (_) => const RewardsScreen()));
         break;
+
+      // ── Badges → BadgesScreen ─────────────────────────────────────────────
+      case 'badges':
+        Navigator.push(context,
+            MaterialPageRoute(builder: (_) => const BadgesScreen()));
+        break;
+
 
       // ── Other screens — add Navigator.push as you build them ──────────────
       default:
