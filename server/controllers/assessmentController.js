@@ -212,6 +212,8 @@ export const analyzeWithML = async (req, res) => {
       detectedIssue: mlResult.detectedIssue,
       riskLevel: mlResult.riskLevel,
       cleanedText: mlResult.cleanedText,
+      mlPrediction: mlResult.mlPrediction,
+      mlConfidence: mlResult.mlConfidence,
       disclaimer: mlResult.disclaimer
     });
 

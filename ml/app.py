@@ -2,6 +2,8 @@ from flask import Flask, request, jsonify
 from flask_cors import CORS
 import nltk
 import re
+import joblib
+import os
 
 nltk.download('stopwords')
 nltk.download('punkt')
@@ -11,6 +13,15 @@ from nltk.corpus import stopwords
 app = Flask(__name__)
 CORS(app)
 
+# ─── Load Trained ML Model ────────────────────────
+MODEL_PATH = os.path.join(os.path.dirname(__file__), 'models', 'mental_health_model.pkl')
+VECTORIZER_PATH = os.path.join(os.path.dirname(__file__), 'models', 'tfidf_vectorizer.pkl')
+
+ml_model = joblib.load(MODEL_PATH)
+ml_vectorizer = joblib.load(VECTORIZER_PATH)
+
+print("✅ ML model and vectorizer loaded successfully!")
+
 # ─── Clean Text ──────────────────────────────────
 def clean_text(text):
     text = re.sub(r'[^a-zA-Z\s]', '', text)
@@ -19,6 +30,22 @@ def clean_text(text):
     words = text.split()
     words = [w for w in words if w not in stop_words]
     return ' '.join(words)
+
+# ─── ML Prediction Function ───────────────────────
+def predict_with_ml(text):
+    cleaned = clean_text(text)
+    vectorized = ml_vectorizer.transform([cleaned])
+
+    prediction = ml_model.predict(vectorized)[0]
+    probabilities = ml_model.predict_proba(vectorized)[0]
+
+    confidence = round(max(probabilities) * 100, 2)
+    label = "depression" if prediction == 1 else "normal"
+
+    return {
+        "mlPrediction": label,
+        "mlConfidence": confidence
+    }
 
 # ─── Keywords ────────────────────────────────────
 depression_keywords = [
@@ -138,7 +165,7 @@ def home():
         "message": "🌱 MindBloom ML API running!"
     })
 
-# 2. Analyze symptoms
+# 2. Analyze symptoms (now includes REAL ML prediction)
 @app.route('/ml/analyze', methods=['POST'])
 def analyze():
     try:
@@ -155,6 +182,8 @@ def analyze():
         risk_level = calculate_risk(keywords)
         cleaned = clean_text(text)
 
+        ml_result = predict_with_ml(text)
+
         return jsonify({
             "success": True,
             "text": text,
@@ -163,6 +192,8 @@ def analyze():
             "detectedIssue": detected_issue,
             "riskLevel": risk_level,
             "keywordCount": len(keywords),
+            "mlPrediction": ml_result["mlPrediction"],
+            "mlConfidence": ml_result["mlConfidence"],
             "disclaimer": "This is not a medical diagnosis."
         })
 
