@@ -148,10 +148,10 @@ class _BadgesScreenState extends State<BadgesScreen>
       earned: false,
     ),
     BadgeItem(
-      id: 'b6', title: 'Sleep Champion',
-      condition: 'Log 7+ hours of sleep for 7 consecutive nights',
-      icon: Icons.bedtime_rounded,
-      color: _C.blue, bg: _C.blueBg,
+      id: 'b6', title: 'Level 10 Hero',
+      condition: 'Reach XP Level 10',
+      icon: Icons.bolt_rounded,
+      color: _C.purple, bg: _C.purpleBg,
       earned: false,
     ),
     BadgeItem(
@@ -168,13 +168,13 @@ class _BadgesScreenState extends State<BadgesScreen>
       color: _C.rose, bg: _C.roseBg,
       earned: false,
     ),
-    BadgeItem(
-      id: 'b9', title: 'Level 10 Hero',
-      condition: 'Reach XP Level 10',
-      icon: Icons.bolt_rounded,
-      color: _C.purple, bg: _C.purpleBg,
-      earned: false,
-    ),
+    // BadgeItem(
+    //   id: 'b9', title: '',
+    //   condition: '',
+    //   icon: Icons.,
+    //   color: ,
+    //   earned: ,
+    // ),
   ];
 
   int get _earnedCount => _badges.where((b) => b.earned).length;

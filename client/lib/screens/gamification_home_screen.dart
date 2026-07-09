@@ -11,6 +11,8 @@ import 'xp_level_screen.dart';     // ← Screen 3
 import 'challenges screen.dart';   // ← Screen 4 
 import 'rewards_screen.dart'; //  ← Screen 5
 import 'badges_screen.dart';  //  ← Screen 6
+import 'Tree_screen.dart';    //  ← Screen 7
+import '../services/notification_service.dart'; // ← Notifications
 
 // ── Standalone entry point (delete when integrating) ─────────────────────────
 void main() {
@@ -109,6 +111,11 @@ class _ScreenState extends State<GamificationHomeScreen>
   @override
   void initState() {
     super.initState();
+
+    // ── Notifications: request permission + schedule streak reminder ────────
+    NotificationService.instance.requestPermissions();
+    NotificationService.instance.scheduleStreakReminder();
+
     _fadeCtrl = AnimationController(vsync: this,
         duration: const Duration(milliseconds: 450));
     _ringCtrl = AnimationController(vsync: this,
@@ -169,6 +176,11 @@ class _ScreenState extends State<GamificationHomeScreen>
             MaterialPageRoute(builder: (_) => const BadgesScreen()));
         break;
 
+      // ── Tree → TreeScreen (Digital Mental Twin) ───────────────────────────
+      case 'tree':
+        Navigator.push(context,
+            MaterialPageRoute(builder: (_) => TreeScreen(userId: 'demo_user')));
+        break;
 
       // ── Other screens — add Navigator.push as you build them ──────────────
       default:
