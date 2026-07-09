@@ -1,345 +1,498 @@
 import 'package:flutter/material.dart';
-import '../../services/selfcare_service.dart';
-import 'breathing_screen.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:url_launcher/url_launcher.dart';
+import '../../data/mindfeed_content.dart';
+import '../../theme/mindbloom_theme.dart';
 
-class ActivitiesScreen extends StatefulWidget {
-  const ActivitiesScreen({super.key});
+/// MindFeed — a positive social-style wall with 4 tabs:
+/// 🫙 Memory Jar · 💚 Self Love · 🎥 TED Talks · 🌿 Wellness Tips
+class MindFeedScreen extends StatefulWidget {
+  final int initialTab; // 0 = Memory Jar (used by "Positive Memories")
+  const MindFeedScreen({super.key, this.initialTab = 0});
 
   @override
-  State<ActivitiesScreen> createState() => _ActivitiesScreenState();
+  State<MindFeedScreen> createState() => _MindFeedScreenState();
 }
 
-class _ActivitiesScreenState extends State<ActivitiesScreen> {
-  List<dynamic> activities = [];
-  bool isLoading = true;
-  String selectedType = 'all';
-  String selectedRisk = 'all';
+class _MindFeedScreenState extends State<MindFeedScreen> {
+  @override
+  Widget build(BuildContext context) {
+    return DefaultTabController(
+      length: 4,
+      initialIndex: widget.initialTab,
+      child: Scaffold(
+        backgroundColor: MBColors.background,
+        body: SafeArea(
+          child: Column(
+            children: [
+              Padding(
+                padding: const EdgeInsets.fromLTRB(8, 8, 20, 0),
+                child: Row(
+                  children: [
+                    IconButton(
+                      onPressed: () => Navigator.pop(context),
+                      icon: const Icon(
+                        Icons.arrow_back_ios_new_rounded,
+                        color: MBColors.darkGreen,
+                      ),
+                    ),
+                    const Text(
+                      'MindFeed',
+                      style: TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.w800,
+                        color: MBColors.darkGreen,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const TabBar(
+                isScrollable: true,
+                labelColor: MBColors.darkGreen,
+                unselectedLabelColor: MBColors.textSecondary,
+                indicatorColor: MBColors.darkGreen,
+                tabAlignment: TabAlignment.start,
+                tabs: [
+                  Tab(text: '🫙 Memory Jar'),
+                  Tab(text: '💚 Self Love'),
+                  Tab(text: '🎥 TED Talks'),
+                  Tab(text: '🌿 Wellness'),
+                ],
+              ),
+              const Expanded(
+                child: TabBarView(
+                  children: [
+                    _MemoryJarTab(),
+                    _SelfLoveTab(),
+                    _TedTalksTab(),
+                    _WellnessTab(),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
 
-  final List<Map<String, dynamic>> types = [
-    {'label': 'All', 'value': 'all', 'icon': Icons.apps},
-    {'label': 'Breathing', 'value': 'breathing', 'icon': Icons.air},
-    {
-      'label': 'Meditation',
-      'value': 'meditation',
-      'icon': Icons.self_improvement,
-    },
-    {'label': 'Journaling', 'value': 'journaling', 'icon': Icons.book},
-    {'label': 'Sleep', 'value': 'sleep_tips', 'icon': Icons.bedtime},
-    {'label': 'Audio', 'value': 'audio', 'icon': Icons.headphones},
-  ];
+// ── 🫙 MEMORY JAR ────────────────────────────────────────────────────
+class _MemoryJarTab extends StatefulWidget {
+  const _MemoryJarTab();
+  @override
+  State<_MemoryJarTab> createState() => _MemoryJarTabState();
+}
 
-  final List<Map<String, dynamic>> risks = [
-    {'label': 'All', 'value': 'all', 'color': Colors.grey},
-    {'label': 'Low', 'value': 'low', 'color': Colors.green},
-    {'label': 'Moderate', 'value': 'moderate', 'color': Colors.orange},
-    {'label': 'High', 'value': 'high', 'color': Colors.red},
-  ];
+class _MemoryJarTabState extends State<_MemoryJarTab> {
+  final TextEditingController _controller = TextEditingController();
+  List<String> _memories = [];
 
   @override
   void initState() {
     super.initState();
-    loadActivities();
+    _load();
   }
 
-  Future<void> loadActivities() async {
-    setState(() => isLoading = true);
-    try {
-      final data = await SelfcareService.getActivities(
-        type: selectedType == 'all' ? null : selectedType,
-        riskLevel: selectedRisk == 'all' ? null : selectedRisk,
+  Future<void> _load() async {
+    final p = await SharedPreferences.getInstance();
+    setState(() => _memories = p.getStringList('memory_jar') ?? []);
+  }
+
+  Future<void> _add() async {
+    final text = _controller.text.trim();
+    if (text.isEmpty) return;
+    final now = DateTime.now();
+    final dated = '$text|${now.day}/${now.month}/${now.year}';
+    final p = await SharedPreferences.getInstance();
+    _memories.insert(0, dated);
+    await p.setStringList('memory_jar', _memories);
+    _controller.clear();
+    FocusScope.of(context).unfocus();
+    setState(() {});
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Memory dropped into the jar 🫙✨')),
+    );
+  }
+
+  void _openJar() {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: MBColors.card,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+      ),
+      builder: (_) => DraggableScrollableSheet(
+        expand: false,
+        initialChildSize: 0.7,
+        builder: (_, controller) => Padding(
+          padding: const EdgeInsets.fromLTRB(20, 20, 20, 20),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                'Your memories 🫙',
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.w800,
+                  color: MBColors.darkGreen,
+                ),
+              ),
+              const SizedBox(height: 12),
+              Expanded(
+                child: _memories.isEmpty
+                    ? const Center(
+                        child: Text(
+                          'The jar is empty — add your first memory!',
+                          style: TextStyle(color: MBColors.textSecondary),
+                        ),
+                      )
+                    : ListView.builder(
+                        controller: controller,
+                        itemCount: _memories.length,
+                        itemBuilder: (_, i) {
+                          final parts = _memories[i].split('|');
+                          final text = parts[0];
+                          final date = parts.length > 1 ? parts[1] : '';
+                          return Container(
+                            margin: const EdgeInsets.only(bottom: 10),
+                            padding: const EdgeInsets.all(14),
+                            decoration: BoxDecoration(
+                              color: MBColors.journalTile,
+                              borderRadius: BorderRadius.circular(16),
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  text,
+                                  style: const TextStyle(
+                                    fontSize: 14.5,
+                                    height: 1.4,
+                                    color: MBColors.textPrimary,
+                                  ),
+                                ),
+                                const SizedBox(height: 6),
+                                Text(
+                                  date,
+                                  style: const TextStyle(
+                                    fontSize: 11.5,
+                                    color: MBColors.textSecondary,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          );
+                        },
+                      ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(20),
+      child: Column(
+        children: [
+          const Text(
+            'Drop a happy memory into your jar.\nOpen it whenever you need a smile.',
+            textAlign: TextAlign.center,
+            style: TextStyle(color: MBColors.textSecondary, height: 1.4),
+          ),
+          const SizedBox(height: 20),
+
+          // The jar (tap to open)
+          GestureDetector(
+            onTap: _openJar,
+            child: Column(
+              children: [
+                // lid
+                Container(
+                  width: 90,
+                  height: 18,
+                  decoration: BoxDecoration(
+                    color: MBColors.darkGreen,
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                ),
+                const SizedBox(height: 3),
+                // body
+                Container(
+                  width: 150,
+                  height: 170,
+                  decoration: BoxDecoration(
+                    color: MBColors.breathingTile.withOpacity(0.6),
+                    border: Border.all(
+                      color: MBColors.darkGreen.withOpacity(0.4),
+                      width: 2.5,
+                    ),
+                    borderRadius: const BorderRadius.only(
+                      topLeft: Radius.circular(18),
+                      topRight: Radius.circular(18),
+                      bottomLeft: Radius.circular(44),
+                      bottomRight: Radius.circular(44),
+                    ),
+                  ),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Text('✨', style: TextStyle(fontSize: 30)),
+                      const SizedBox(height: 6),
+                      Text(
+                        '${_memories.length}',
+                        style: const TextStyle(
+                          fontSize: 28,
+                          fontWeight: FontWeight.w800,
+                          color: MBColors.darkGreen,
+                        ),
+                      ),
+                      const Text(
+                        'memories',
+                        style: TextStyle(
+                          fontSize: 13,
+                          color: MBColors.textSecondary,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 8),
+                const Text(
+                  'Tap the jar to read them',
+                  style: TextStyle(
+                    fontSize: 12.5,
+                    color: MBColors.textSecondary,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 24),
+
+          Container(
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(18),
+            ),
+            child: TextField(
+              controller: _controller,
+              maxLines: 3,
+              minLines: 1,
+              style: const TextStyle(color: MBColors.textPrimary),
+              decoration: const InputDecoration(
+                hintText: 'Write a happy memory...',
+                hintStyle: TextStyle(color: MBColors.textSecondary),
+                contentPadding: EdgeInsets.all(14),
+                border: InputBorder.none,
+              ),
+            ),
+          ),
+          const SizedBox(height: 12),
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton.icon(
+              onPressed: _add,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: MBColors.darkGreen,
+                foregroundColor: Colors.white,
+                elevation: 0,
+                padding: const EdgeInsets.symmetric(vertical: 14),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(18),
+                ),
+              ),
+              icon: const Icon(Icons.add_rounded),
+              label: const Text(
+                'Drop into the jar',
+                style: TextStyle(fontWeight: FontWeight.w600),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ── 💚 SELF LOVE ─────────────────────────────────────────────────────
+class _SelfLoveTab extends StatelessWidget {
+  const _SelfLoveTab();
+
+  static const List<Color> _cardColors = [
+    MBColors.meditationTile,
+    MBColors.journalTile,
+    MBColors.breathingTile,
+    MBColors.audioTile,
+    MBColors.mindfeedTile,
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    return ListView.builder(
+      padding: const EdgeInsets.all(20),
+      itemCount: selfLoveAffirmations.length,
+      itemBuilder: (_, i) => Container(
+        margin: const EdgeInsets.only(bottom: 12),
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
+        decoration: BoxDecoration(
+          color: _cardColors[i % _cardColors.length],
+          borderRadius: BorderRadius.circular(22),
+        ),
+        child: Center(
+          child: Text(
+            selfLoveAffirmations[i],
+            textAlign: TextAlign.center,
+            style: const TextStyle(
+              fontFamily: 'Caveat',
+              fontSize: 24,
+              fontWeight: FontWeight.w700,
+              color: MBColors.darkGreen,
+              height: 1.3,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// ── 🎥 TED TALKS ─────────────────────────────────────────────────────
+class _TedTalksTab extends StatelessWidget {
+  const _TedTalksTab();
+
+  Future<void> _openTalk(BuildContext context, TedTalk talk) async {
+    if (talk.url.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Link coming soon — search "${talk.title}" on YouTube'),
+        ),
       );
-      setState(() {
-        activities = data;
-        isLoading = false;
-      });
-    } catch (e) {
-      setState(() => isLoading = false);
+      return;
     }
-  }
-
-  IconData getIcon(String type) {
-    switch (type) {
-      case 'breathing':
-        return Icons.air;
-      case 'meditation':
-        return Icons.self_improvement;
-      case 'journaling':
-        return Icons.book;
-      case 'sleep_tips':
-        return Icons.bedtime;
-      case 'audio':
-        return Icons.headphones;
-      default:
-        return Icons.favorite;
-    }
-  }
-
-  Color getRiskColor(String risk) {
-    switch (risk) {
-      case 'low':
-        return Colors.green;
-      case 'moderate':
-        return Colors.orange;
-      case 'high':
-        return Colors.red;
-      default:
-        return Colors.grey;
+    final uri = Uri.parse(talk.url);
+    if (!await launchUrl(uri, mode: LaunchMode.externalApplication)) {
+      // ignore: use_build_context_synchronously
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Could not open the link')));
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFFF5F9F7),
-      appBar: AppBar(
-        backgroundColor: Colors.teal.shade400,
-        foregroundColor: Colors.white,
-        title: const Text('Self-Care Activities'),
-      ),
-      body: Column(
-        children: [
-          // Type filter
-          Container(
-            color: Colors.white,
-            padding: const EdgeInsets.symmetric(vertical: 12),
-            child: SizedBox(
-              height: 40,
-              child: ListView.builder(
-                scrollDirection: Axis.horizontal,
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                itemCount: types.length,
-                itemBuilder: (context, index) {
-                  final type = types[index];
-                  final isSelected = selectedType == type['value'];
-                  return GestureDetector(
-                    onTap: () {
-                      setState(() => selectedType = type['value']);
-                      loadActivities();
-                    },
-                    child: Container(
-                      margin: const EdgeInsets.only(right: 8),
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 8,
-                      ),
-                      decoration: BoxDecoration(
-                        color: isSelected
-                            ? Colors.teal.shade400
-                            : Colors.grey.shade100,
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                      child: Row(
-                        children: [
-                          Icon(
-                            type['icon'] as IconData,
-                            size: 16,
-                            color: isSelected
-                                ? Colors.white
-                                : Colors.grey.shade600,
-                          ),
-                          const SizedBox(width: 4),
-                          Text(
-                            type['label'],
-                            style: TextStyle(
-                              color: isSelected
-                                  ? Colors.white
-                                  : Colors.grey.shade600,
-                              fontSize: 13,
-                              fontWeight: isSelected
-                                  ? FontWeight.bold
-                                  : FontWeight.normal,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  );
-                },
-              ),
+    return ListView(
+      padding: const EdgeInsets.all(20),
+      children: [
+        for (final cat in tedCategories) ...[
+          Text(
+            '${cat.emoji} ${cat.name}',
+            style: const TextStyle(
+              fontSize: 17,
+              fontWeight: FontWeight.w800,
+              color: MBColors.darkGreen,
             ),
           ),
-
-          // Risk filter
-          Container(
-            color: Colors.white,
-            padding: const EdgeInsets.only(left: 16, right: 16, bottom: 12),
-            child: Row(
-              children: risks.map((risk) {
-                final isSelected = selectedRisk == risk['value'];
-                return GestureDetector(
-                  onTap: () {
-                    setState(() => selectedRisk = risk['value']);
-                    loadActivities();
-                  },
-                  child: Container(
-                    margin: const EdgeInsets.only(right: 8),
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 6,
-                    ),
-                    decoration: BoxDecoration(
-                      color: isSelected
-                          ? (risk['color'] as Color).withOpacity(0.15)
-                          : Colors.grey.shade100,
-                      borderRadius: BorderRadius.circular(20),
-                      border: Border.all(
-                        color: isSelected
-                            ? risk['color'] as Color
-                            : Colors.transparent,
-                      ),
-                    ),
-                    child: Text(
-                      risk['label'],
-                      style: TextStyle(
-                        color: isSelected
-                            ? risk['color'] as Color
-                            : Colors.grey.shade600,
-                        fontSize: 13,
-                        fontWeight: isSelected
-                            ? FontWeight.bold
-                            : FontWeight.normal,
-                      ),
-                    ),
-                  ),
-                );
-              }).toList(),
-            ),
-          ),
-
-          // Activities list
-          Expanded(
-            child: isLoading
-                ? const Center(
-                    child: CircularProgressIndicator(color: Color(0xFF4CAF82)),
-                  )
-                : activities.isEmpty
-                ? const Center(child: Text('No activities found'))
-                : ListView.builder(
-                    padding: const EdgeInsets.all(16),
-                    itemCount: activities.length,
-                    itemBuilder: (context, index) {
-                      final activity = activities[index];
-                      return Container(
-                        margin: const EdgeInsets.only(bottom: 12),
-                        padding: const EdgeInsets.all(16),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(12),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withOpacity(0.05),
-                              blurRadius: 8,
-                            ),
-                          ],
+          const SizedBox(height: 10),
+          ...cat.talks.map(
+            (talk) => Container(
+              margin: const EdgeInsets.only(bottom: 10),
+              child: Material(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(18),
+                child: InkWell(
+                  borderRadius: BorderRadius.circular(18),
+                  onTap: () => _openTalk(context, talk),
+                  child: Padding(
+                    padding: const EdgeInsets.all(14),
+                    child: Row(
+                      children: [
+                        Container(
+                          width: 46,
+                          height: 46,
+                          decoration: BoxDecoration(
+                            color: Colors.redAccent.withOpacity(0.12),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: const Icon(
+                            Icons.play_circle_fill_rounded,
+                            color: Colors.redAccent,
+                            size: 26,
+                          ),
                         ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
-                              children: [
-                                Container(
-                                  padding: const EdgeInsets.all(10),
-                                  decoration: BoxDecoration(
-                                    color: getRiskColor(
-                                      activity['riskLevel'],
-                                    ).withOpacity(0.1),
-                                    borderRadius: BorderRadius.circular(10),
-                                  ),
-                                  child: Icon(
-                                    getIcon(activity['type']),
-                                    color: getRiskColor(activity['riskLevel']),
-                                  ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                talk.title,
+                                style: const TextStyle(
+                                  fontSize: 14.5,
+                                  fontWeight: FontWeight.w700,
+                                  color: MBColors.textPrimary,
+                                  height: 1.3,
                                 ),
-                                const SizedBox(width: 12),
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        activity['title'],
-                                        style: const TextStyle(
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: 16,
-                                        ),
-                                      ),
-                                      Row(
-                                        children: [
-                                          Container(
-                                            padding: const EdgeInsets.symmetric(
-                                              horizontal: 6,
-                                              vertical: 2,
-                                            ),
-                                            decoration: BoxDecoration(
-                                              color: getRiskColor(
-                                                activity['riskLevel'],
-                                              ).withOpacity(0.1),
-                                              borderRadius:
-                                                  BorderRadius.circular(4),
-                                            ),
-                                            child: Text(
-                                              activity['riskLevel'],
-                                              style: TextStyle(
-                                                color: getRiskColor(
-                                                  activity['riskLevel'],
-                                                ),
-                                                fontSize: 11,
-                                                fontWeight: FontWeight.bold,
-                                              ),
-                                            ),
-                                          ),
-                                          const SizedBox(width: 6),
-                                          Text(
-                                            '${activity['duration']} min',
-                                            style: TextStyle(
-                                              color: Colors.grey.shade600,
-                                              fontSize: 12,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 10),
-                            Text(
-                              activity['content'],
-                              style: TextStyle(
-                                color: Colors.grey.shade700,
-                                fontSize: 14,
                               ),
-                            ),
-                            if (activity['type'] == 'breathing') ...[
-                              const SizedBox(height: 10),
-                              ElevatedButton.icon(
-                                onPressed: () => Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (_) => BreathingScreen(
-                                      riskLevel: activity['riskLevel'],
-                                    ),
-                                  ),
-                                ),
-                                icon: const Icon(Icons.air, size: 16),
-                                label: const Text('Start Exercise'),
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: Colors.teal.shade400,
-                                  foregroundColor: Colors.white,
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(8),
-                                  ),
+                              Text(
+                                talk.speaker,
+                                style: const TextStyle(
+                                  fontSize: 12.5,
+                                  color: MBColors.textSecondary,
                                 ),
                               ),
                             ],
-                          ],
+                          ),
                         ),
-                      );
-                    },
+                        const Icon(
+                          Icons.open_in_new_rounded,
+                          size: 18,
+                          color: MBColors.textSecondary,
+                        ),
+                      ],
+                    ),
                   ),
+                ),
+              ),
+            ),
           ),
+          const SizedBox(height: 14),
         ],
+      ],
+    );
+  }
+}
+
+// ── 🌿 WELLNESS TIPS ─────────────────────────────────────────────────
+class _WellnessTab extends StatelessWidget {
+  const _WellnessTab();
+
+  @override
+  Widget build(BuildContext context) {
+    return ListView.builder(
+      padding: const EdgeInsets.all(20),
+      itemCount: wellnessTips.length,
+      itemBuilder: (_, i) => Container(
+        margin: const EdgeInsets.only(bottom: 10),
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(18),
+        ),
+        child: Text(
+          wellnessTips[i],
+          style: const TextStyle(
+            fontSize: 14.5,
+            height: 1.4,
+            color: MBColors.textPrimary,
+          ),
+        ),
       ),
     );
   }
