@@ -271,62 +271,88 @@ class AssessmentHome extends StatelessWidget {
   }
 
   // ============================================================
-  // HEADER — app bar + "Assessment Center" merged into one
-  // curved gradient block
+  // HEADER — image blended edge-to-edge like the dashboard hero
   // ============================================================
   Widget _buildHeader(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      decoration: const BoxDecoration(
-        color: heroBg, // same green as the lotus image background
-        borderRadius: BorderRadius.only(
-          bottomLeft: Radius.circular(30),
-          bottomRight: Radius.circular(30),
-        ),
+    return ClipRRect(
+      borderRadius: const BorderRadius.only(
+        bottomLeft: Radius.circular(30),
+        bottomRight: Radius.circular(30),
       ),
-      child: SafeArea(
-        bottom: false,
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(16, 8, 20, 26),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Back button row
-              Row(
-                children: [
-                  GestureDetector(
-                    onTap: () => Navigator.pop(context),
-                    child: Container(
-                      width: 40,
-                      height: 40,
-                      decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.12),
-                        shape: BoxShape.circle,
-                        border: Border.all(
-                          color: Colors.white.withOpacity(0.25),
+      child: Container(
+        width: double.infinity,
+        color: heroBg, // same green as the lotus image background
+        child: Stack(
+          children: [
+            // Illustration fills the right side, flush to the edge
+            Positioned(
+              top: 26,
+              right: 12,
+              bottom: 22,
+              width: 150,
+              child: Image.asset(
+                'assets/images/hero_meditation.png',
+                fit: BoxFit.contain,
+                alignment: Alignment.centerRight,
+                errorBuilder: (context, error, stack) =>
+                    const SizedBox.shrink(),
+              ),
+            ),
+            // Fade so the text side stays clean (same as dashboard hero)
+            Positioned.fill(
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.centerLeft,
+                    end: Alignment.centerRight,
+                    stops: const [0.0, 0.45, 0.60, 0.80],
+                    colors: [
+                      heroBg,
+                      heroBg,
+                      heroBg.withOpacity(0.45),
+                      heroBg.withOpacity(0.0),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+            // Content
+            SafeArea(
+              bottom: false,
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(16, 8, 20, 26),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Back button
+                    GestureDetector(
+                      onTap: () => Navigator.pop(context),
+                      child: Container(
+                        width: 40,
+                        height: 40,
+                        decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(0.12),
+                          shape: BoxShape.circle,
+                          border: Border.all(
+                            color: Colors.white.withOpacity(0.25),
+                          ),
                         ),
-                      ),
-                      child: const Center(
-                        child: Text(
-                          '\u2190',
-                          style: TextStyle(
-                            color: Color(0xFFEAF4EF),
-                            fontSize: 18,
-                            height: 1,
+                        child: const Center(
+                          child: Text(
+                            '\u2190',
+                            style: TextStyle(
+                              color: Color(0xFFEAF4EF),
+                              fontSize: 18,
+                              height: 1,
+                            ),
                           ),
                         ),
                       ),
                     ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 18),
-              // Title + copy + icon
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 4),
-                child: Row(
-                  children: [
-                    Expanded(
+                    const SizedBox(height: 18),
+                    // Title + underline (image sits behind, on the right)
+                    Padding(
+                      padding: const EdgeInsets.only(left: 4, right: 120),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -341,7 +367,7 @@ class AssessmentHome extends StatelessWidget {
                           ),
                           const SizedBox(height: 8),
                           const Text(
-                            'Understand your\nmental wellbeing',
+                            'Understand your mental wellbeing',
                             style: TextStyle(
                               color: Color(0xFFEAF4EF),
                               fontSize: 22,
@@ -362,24 +388,11 @@ class AssessmentHome extends StatelessWidget {
                         ],
                       ),
                     ),
-                    const SizedBox(width: 12),
-                    // Lotus illustration (same asset as the dashboard hero)
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(18),
-                      child: Image.asset(
-                        'assets/images/hero_meditation.png',
-                        width: 118,
-                        height: 82,
-                        fit: BoxFit.cover,
-                        errorBuilder: (context, error, stack) =>
-                            const SizedBox.shrink(),
-                      ),
-                    ),
                   ],
                 ),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
